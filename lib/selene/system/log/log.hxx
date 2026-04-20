@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace selene::sys::log
+namespace selene::system::log
 {
   class selenelog
   {
@@ -10,9 +10,9 @@ namespace selene::sys::log
     static inline constexpr size_t BUFFER_SIZE = 128;
 
   public:
-    void info(const char *tag, const char *fmt, ...);
-    void warn(const char *tag, const char *fmt, ...);
-    void error(const char *tag, const char *fmt, ...);
+    static void info(const char *tag, const char *fmt, ...);
+    static void warn(const char *tag, const char *fmt, ...);
+    static void error(const char *tag, const char *fmt, ...);
 
     selenelog() = delete;
   };

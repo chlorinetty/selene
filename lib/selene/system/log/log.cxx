@@ -2,7 +2,7 @@
 
 #include "Arduino.h"
 
-namespace selene::sys::log
+namespace selene::system::log
 {
   void selenelog::info(const char *tag, const char *fmt, ...)
   {
