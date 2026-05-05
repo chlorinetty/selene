@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "types/system/init.hxx"
+#include "selene.hxx"
 
 namespace selene::system::init
 {
@@ -27,65 +27,65 @@ namespace selene::system::init
     /// @param name Name of the module.
     /// @param smodule Instance of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     register_module(const char *name, selenemodule *smodule);
 
     /// @brief Get state of named module.
     /// @param name Name of the module.
     /// @param out State of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     state(const char *name, ModuleState &out) const;
     /// @brief Get state of named module.
     /// @param index Index of the module.
     /// @param out State of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     state(size_t index, ModuleState &out) const;
 
     /// @brief Start a named module.
     /// @param name Name of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     start(const char *name);
     /// @brief Start a named module.
     /// @param index Index of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     start(size_t index);
     /// @brief Start all named modules.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     start_all(void); // TODO: return failed modules
 
     /// @brief Run task of a named module.
     /// @param name Name of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     task(const char *name);
     /// @brief Run task of a named module.
     /// @param index Index of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     task(size_t index);
     /// @brief Run tasks of all named modules.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     task_all(void); // TODO: return failed modules
 
     /// @brief Stop a named module.
     /// @param name Name of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     stop(const char *name);
     /// @brief Stop a named module.
     /// @param index Index of the module.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     stop(size_t index);
     /// @brief Stop all named modules.
     /// @return InitResponse - OK if good.
-    InitResponse
+    SELERR
     stop_all(void); // TODO: return failed modules
 
     /// @brief Get the instance of the named module.

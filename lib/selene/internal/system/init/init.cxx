@@ -1,163 +1,158 @@
 #include "init.hxx"
 
-#include <string.h>
+#include "Arduino.h"
 
-using namespace selene::types::system::init;
 namespace selene::system::init
 {
-  InitResponse
+  SELERR
   seleneinit::register_module(const char *name, selenemodule *smodule)
   {
     if (this->count >= MODULES_SIZE)
-      return InitResponse::ENOSPACE;
+      return SELERR::EIMNOSPACE;
 
     if (find(name) != -1)
-      return InitResponse::EMODDUPL;
+      return SELERR::EIMODDUPLI;
 
     this->modules[count++] = {.name = name,
                               .smodule = smodule,
                               .state = ModuleState::REGISTERED};
 
-    return InitResponse::OK;
+    return SELERR::OK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::state(const char *name, ModuleState &out) const
   {
     int pos = find(name);
     if (pos == -1)
-      return InitResponse::ENOFOUND;
+      return SELERR::EIMNOFOUND;
 
     return this->state(pos, out);
   }
 
-  InitResponse
+  SELERR
   seleneinit::state(size_t index, ModuleState &out) const
   {
     if (index >= this->count)
-      return InitResponse::EISOUTOB;
+      return SELERR::ESINVVALUE;
 
     out = this->modules[index].state;
-    return InitResponse::OK;
+    return SELERR::OK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::start(const char *name)
   {
     int pos = find(name);
     if (pos == -1)
-      return InitResponse::ENOFOUND;
+      return SELERR::EIMNOFOUND;
 
     return start(pos);
   }
 
-  InitResponse
+  SELERR
   seleneinit::start(size_t index)
   {
     if (index >= this->count)
-      return InitResponse::EISOUTOB;
+      return SELERR::ESINVVALUE;
 
     auto &mod = this->modules[index];
     if (!mod.smodule)
-      return InitResponse::EMODNULL;
+      return SELERR::EIMODINULL;
 
     if (mod.state != ModuleState::REGISTERED &&
         mod.state != ModuleState::STOPPED)
-      return InitResponse::EILSTATE;
+      return SELERR::EIMODILSTA;
 
-    mod.state = (mod.smodule->start() == 0) ? ModuleState::STARTED : ModuleState::FAILURE;
+    mod.state = (mod.smodule->start() == 0) ? ModuleState::STARTED : ModuleState::STOPPED;
 
     if (mod.state != ModuleState::STARTED)
-      return InitResponse::EMODFAIL;
+      return SELERR::EIMODISTOP;
 
-    return InitResponse::OK;
+    return SELERR::OK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::start_all(void)
   {
     bool all_ok = true;
     for (size_t i = 0; i < this->count; i++)
-      if (start(i) != InitResponse::OK)
+      if (start(i) != SELERR::OK)
         all_ok = false;
-    return all_ok ? InitResponse::OK : InitResponse::EMODFAIL;
+    return all_ok ? SELERR::OK : SELERR::EIMODISTOP;
   }
 
-  InitResponse
+  SELERR
   seleneinit::task(const char *name)
   {
     int pos = find(name);
     if (pos == -1)
-      return InitResponse::ENOFOUND;
+      return SELERR::EIMNOFOUND;
 
     return task(pos);
   }
 
-  InitResponse
+  SELERR
   seleneinit::task(size_t index)
   {
     if (index >= this->count)
-      return InitResponse::EISOUTOB;
+      return SELERR::ESINVVALUE;
 
     auto &mod = this->modules[index];
     if (!mod.smodule)
-      return InitResponse::EMODNULL;
+      return SELERR::EIMODINULL;
 
     if (mod.state != ModuleState::STARTED)
-      return InitResponse::EILSTATE;
+      return SELERR::EIMODILSTA;
 
-    return (mod.smodule->task() == 0) ? InitResponse::OK : InitResponse::EMODFAIL;
+    return (mod.smodule->task() == 0) ? SELERR::OK : SELERR::EIMODFTASK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::task_all(void)
   {
     bool all_ok = true;
     for (size_t i = 0; i < this->count; i++)
-      if (task(i) != InitResponse::OK)
+      if (task(i) != SELERR::OK)
         all_ok = false;
-    return all_ok ? InitResponse::OK : InitResponse::EMODFAIL;
+    return all_ok ? SELERR::OK : SELERR::EIMODFTASK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::stop(const char *name)
   {
     int pos = find(name);
     if (pos == -1)
-      return InitResponse::ENOFOUND;
+      return SELERR::EIMNOFOUND;
 
     return stop(pos);
   }
 
-  InitResponse
+  SELERR
   seleneinit::stop(size_t index)
   {
     if (index >= this->count)
-      return InitResponse::EISOUTOB;
+      return SELERR::ESINVVALUE;
 
     auto &mod = this->modules[index];
     if (!mod.smodule)
-      return InitResponse::EMODNULL;
+      return SELERR::EIMODINULL;
 
     if (mod.state != ModuleState::STARTED)
-      return InitResponse::EILSTATE;
+      return SELERR::EIMODILSTA;
 
-    mod.state = (mod.smodule->stop() == 0) ? ModuleState::STOPPED : ModuleState::FAILURE;
-
-    if (mod.state != ModuleState::STOPPED)
-      return InitResponse::EMODFAIL;
-
-    return InitResponse::OK;
+    mod.state = ModuleState::STOPPED;
+    return SELERR::OK;
   }
 
-  InitResponse
+  SELERR
   seleneinit::stop_all(void)
   {
     bool all_ok = true;
     for (size_t i = count; i-- > 0;)
-      if (stop(i) != InitResponse::OK)
+      if (stop(i) != SELERR::OK)
         all_ok = false;
-    return all_ok ? InitResponse::OK : InitResponse::EMODFAIL;
+    return all_ok ? SELERR::OK : SELERR::EIMODILSTA;
   }
 
   int seleneinit::find(const char *name) const
